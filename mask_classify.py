@@ -10,6 +10,7 @@ from keras.layers.convolutional import Convolution2D, MaxPooling2D, ZeroPadding2
 from keras.optimizers import SGD
 from RunMain import VGG_16
 import CallResult
+import matplotlib.pyplot as plt
 
 import cv2
 
@@ -26,22 +27,30 @@ sgd = SGD(lr=0.1, decay=1e-6, momentum=0.9, nesterov=True)
 model.compile(optimizer=sgd, loss='categorical_crossentropy')
 
 def make_masked_image(image, mask_img, threshold, blur=False, blur_amount=10):
-    mask = mask_img <= threshold
+    mask = mask_img < threshold
     result = image.copy()
     if blur:
-        back_image = gaussian(image, blur_amount)
-        back_image = skimage.img_as_ubyte(back_image)
+        # back_image = gaussian(image, blur_amount)
+        # back_image = skimage.img_as_ubyte(back_image)
+        back_image = cv2.GaussianBlur(image, (0,0), blur_amount)
     else:
         back_image = np.zeros(image.shape)
     result[mask] = back_image[mask]
     return result
 
-def test_image_at_levels(image_name, level_list, blur=False, blur_amount=10):
-    img = skimage.io.imread(os.path.join(IMAGE_DIR, image_name[:-3]+'JPEG'))
-    mask_img = skimage.io.imread(os.path.join(MASK_DIR, image_name))
+def test_image_at_levels(image_name, percentages, blur=False, blur_amount=10):
+    # img = skimage.io.imread(os.path.join(IMAGE_DIR, image_name[:-3]+'JPEG'))
+    img = cv2.imread(os.path.join(IMAGE_DIR, image_name[:-3]+'JPEG'))
+    # mask_img = skimage.io.imread(os.path.join(MASK_DIR, image_name))
+    mask_img = cv2.imread(os.path.join(MASK_DIR, image_name))
     results = []
+    level_list = get_ntiles_for_img(mask_img, percentages)
+    print(level_list)
     for level in level_list:
         masked_image = make_masked_image(img, mask_img, level, blur, blur_amount)
+        cv2.imshow('img',masked_image)
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
         # Transform image for VGG
         masked_image = cv2.resize(masked_image, (224,224)).astype(np.float32)
         masked_image[:,:,0] -= 103.939
@@ -50,11 +59,17 @@ def test_image_at_levels(image_name, level_list, blur=False, blur_amount=10):
         masked_image = masked_image.transpose((1,0,2))
         masked_image = np.expand_dims(masked_image, axis=0)
         out = model.predict(masked_image)
-        print(out.max())
         ordered_idx = np.argsort(-out)
+        print(out.max(), ordered_idx[0][0])
         result = (CallResult.lines[int(ordered_idx[0][0])], out[0][ordered_idx[0]][0])
         results.append(result)
 
 
     return results
 
+def get_ntiles_for_img(img, percentages):
+    """ Split calculate """
+    percentiles = []
+    for i in percentages:
+        percentiles.append(np.percentile(img, i))
+    return percentiles
