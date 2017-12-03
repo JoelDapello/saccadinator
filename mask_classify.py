@@ -39,6 +39,14 @@ def make_masked_image(image, mask_img, threshold, blur=False, blur_amount=10):
     return result
 
 def test_image_at_levels(image_name, percentages, blur=False, blur_amount=10):
+    """ Perform the classification accuracy test for the given image
+
+    Args:
+        image_name (string): The name of the image to test (should be in IMAGE_DIR)
+        percetages list(int): A list of percentiles to use for tests e.g. [25,50,100]
+        blur (boolean): whether to blur or leave background black
+        blur_amount (float): the amounf of blur to apply
+    """
     # img = skimage.io.imread(os.path.join(IMAGE_DIR, image_name[:-3]+'JPEG'))
     img = cv2.imread(os.path.join(IMAGE_DIR, image_name[:-3]+'JPEG'))
     # mask_img = skimage.io.imread(os.path.join(MASK_DIR, image_name))
@@ -63,7 +71,6 @@ def test_image_at_levels(image_name, percentages, blur=False, blur_amount=10):
         print(out.max(), ordered_idx[0][0])
         result = (CallResult.lines[int(ordered_idx[0][0])], out[0][ordered_idx[0]][0])
         results.append(result)
-
 
     return results
 
