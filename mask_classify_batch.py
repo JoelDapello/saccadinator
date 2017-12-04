@@ -147,7 +147,7 @@ for img_name in glob.glob(os.path.join(MASK_DIR, '*')):
 
 results_array = []
 ntiles = np.arange(0,101,10)
-for image_name in IMAGE_NAMES[5:10]:
+for image_name in IMAGE_NAMES:
     results_dict = test_image_at_levels(image_name, ntiles, model, blur=True)
     results_array.append(results_dict)
 
