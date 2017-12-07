@@ -119,6 +119,16 @@ def get_VGG_map(WNID):
         if WNID in line: match = line
     return match
 
+def plot_accuracy_vs_saliency(results_array):
+    correct = np.zeros(11)
+    for r in results_array:
+        for i in range(11):
+            best_guess = sorted(results_array['trajectories'], key=lambda x: results_array['trajectories'][x][i])[0]
+            if best_guess == results_array['valid_WNID']:
+                correct[i] += 1
+    return correct
+
+
 
 # In[3]:
 

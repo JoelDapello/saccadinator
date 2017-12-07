@@ -1,15 +1,8 @@
 import numpy as np
 import os
 import glob
-from keras.models import Sequential
-from keras.layers.core import Flatten, Dense, Dropout
-from keras.layers.convolutional import Convolution2D, MaxPooling2D, ZeroPadding2D
-from keras.optimizers import SGD
-from RunMain import VGG_16
-import CallResult
 import matplotlib.pyplot as plt
 
-import cv2
 
 IMAGE_DIR = '/home/nishchal/workspace/MIT/6861/ILSVRC2013_DET_val/done'
 MASK_DIR = '/home/nishchal/workspace/MIT/6861/saliency-salgan-2017/imagenet_saliency'
@@ -22,6 +15,21 @@ for img_name in glob.glob(os.path.join(MASK_DIR, '*')):
 # model = VGG_16(VGG_WEIGHTS)
 # sgd = SGD(lr=0.1, decay=1e-6, momentum=0.9, nesterov=True)
 # model.compile(optimizer=sgd, loss='categorical_crossentropy')
+
+def plot_accuracy_vs_saliency(results_array):
+    correct = np.zeros(11)
+    for r in results_array:
+        for i in range(11):
+            best_guess = sorted(r['trajectories'], reverse=True,key=lambda x: r['trajectories'][x][i])[0]
+            print(best_guess, r['valid_WNID'])
+            if best_guess == r['valid_WNID']:
+                correct[i] += 1
+    return correct/float(len(results_array))
+
+def plot_confidence_vs_saliency(results_array_elem):
+    return results_array_elem['trajectories'][results_array_elem['valid_WNID']]
+
+
 
 def make_masked_image(image, mask_img, threshold, blur=False, blur_amount=10):
     mask = mask_img < threshold
