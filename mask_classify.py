@@ -1,7 +1,4 @@
 import numpy as np
-import skimage
-import skimage.io
-from skimage.filters import gaussian
 import os
 import glob
 from keras.models import Sequential
@@ -22,9 +19,9 @@ for img_name in glob.glob(os.path.join(MASK_DIR, '*')):
     IMAGE_NAMES.append(os.path.split(img_name)[-1])
 
 # Make VGG model
-model = VGG_16(VGG_WEIGHTS)
-sgd = SGD(lr=0.1, decay=1e-6, momentum=0.9, nesterov=True)
-model.compile(optimizer=sgd, loss='categorical_crossentropy')
+# model = VGG_16(VGG_WEIGHTS)
+# sgd = SGD(lr=0.1, decay=1e-6, momentum=0.9, nesterov=True)
+# model.compile(optimizer=sgd, loss='categorical_crossentropy')
 
 def make_masked_image(image, mask_img, threshold, blur=False, blur_amount=10):
     mask = mask_img < threshold
